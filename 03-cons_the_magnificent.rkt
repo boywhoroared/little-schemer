@@ -196,5 +196,31 @@
 
 
 (subst2 'vanilla 'chocolate 'banana '(banana ice cream with chocolate topping))
+
+
+; Try multirember
+; {{{ MULTIREMBER
+(define multirember
+  (lambda (a lat)
+    (cond
+      ; First Commandment; Base case. We've been through the entire list.
+      ((null? lat) (quote ()))
+      ; If the item is `a`, discard `a` by doing multirember on the remainer/tail
+      ; of the list.
+      ((eq? (car lat) a) (multirember a (cdr lat)))
+      ; If the item is not `a`, check the tail of the list for the item, and
+      ; save the current item by cons-ing onto the result.
+      (else (cons (car lat) (multirember a (cdr lat))))
+    )
+  )
+)
+
+(multirember 'cup '(coffee cup tea cup and hick cup))
+; Give coffee tea and hick
+
+; OK - Walkthrough multirember in book anyway just in case I've missed something
+
+; }}}
+
 ; }}}
 
