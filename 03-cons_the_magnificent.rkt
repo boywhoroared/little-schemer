@@ -155,5 +155,46 @@
 
 (insertL 'topping 'fudge '(ice cream with fudge for dessert))
 
+; Try subst
+
+(define subst
+  (lambda (n o lat) ; new seems to be a reserved word in racket
+    (cond
+      ((null? lat) (quote ()))
+      ; If we have found old, insert `new` to the left of `old`
+      ((eq? o (car lat)) (cons n (cdr lat)))
+
+      ; NOTE: (cons new (cons old (cdr lat))) is (cons new lat)
+      ; I saw it before the book pointed it out. w00t.
+
+      ; Keep the current item; Search for 'old' in the remainder of the list.
+      (else (cons (car lat) (subst n o (cdr lat))))
+    )
+  )
+)
+
+
+(subst 'topping 'fudge '(ice cream with fudge for dessert))
+
+; Try subst2
+
+(define subst2
+  (lambda (n o1 o2 lat) ; new seems to be a reserved word in racket
+    (cond
+      ((null? lat) (quote ()))
+      ; If we have found old, insert `new` to the left of `old`
+      ((or (eq? o1 (car lat)) (eq? o2 (car lat))) (cons n (cdr lat)))
+
+      ; NOTE: (cons new (cons old (cdr lat))) is (cons new lat)
+      ; I saw it before the book pointed it out. w00t.
+
+      ; Keep the current item; Search for 'old' in the remainder of the list.
+      (else (cons (car lat) (subst2 n o1 o2 (cdr lat))))
+    )
+  )
+)
+
+
+(subst2 'vanilla 'chocolate 'banana '(banana ice cream with chocolate topping))
 ; }}}
 
