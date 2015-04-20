@@ -134,7 +134,9 @@
 )
 
 (insertR 'topping 'fudge '(ice cream with fudge for dessert))
+; }}}
 
+; {{{ INSERTL
 ; Try insertL
 
 (define insertL
@@ -154,14 +156,17 @@
 )
 
 (insertL 'topping 'fudge '(ice cream with fudge for dessert))
+;}}}
 
+; {{{ SUBST, SUBST2
 ; Try subst
 
 (define subst
   (lambda (n o lat) ; new seems to be a reserved word in racket
     (cond
       ((null? lat) (quote ()))
-      ; If we have found old, insert `new` to the left of `old`
+      ; If we have found old, cons `new` to the tail of the list; this effectively
+      ; replaces the head of the list, `old`.
       ((eq? o (car lat)) (cons n (cdr lat)))
 
       ; NOTE: (cons new (cons old (cdr lat))) is (cons new lat)
@@ -197,8 +202,8 @@
 
 (subst2 'vanilla 'chocolate 'banana '(banana ice cream with chocolate topping))
 
+;}}}
 
-; Try multirember
 ; {{{ MULTIREMBER
 (define multirember
   (lambda (a lat)
@@ -208,8 +213,12 @@
       ; If the item is `a`, discard `a` by doing multirember on the remainer/tail
       ; of the list.
       ((eq? (car lat) a) (multirember a (cdr lat)))
+
       ; If the item is not `a`, check the tail of the list for the item, and
       ; save the current item by cons-ing onto the result.
+
+      ; Alternatively, Save (car lat) to be consed onto the value of
+      ; (multirember a (cdr lat)) later
       (else (cons (car lat) (multirember a (cdr lat))))
     )
   )
@@ -219,8 +228,64 @@
 ; Give coffee tea and hick
 
 ; OK - Walkthrough multirember in book anyway just in case I've missed something
+; }}}
+
+; {{{ MULTIINSERTR
+(define multiinsertR
+  (lambda (n o lat) ; new seems to be a reserved word in racket
+    (cond
+      ((null? lat) (quote ()))
+      ; If we have found old, insert `new` to the right of `old`
+      ((eq? o (car lat)) (cons o (cons n (multiinsertR n o (cdr lat)))))
+      ; Keep the current item; Search for 'old' in the remainder of the list.
+      (else (cons (car lat) (multiinsertR n o (cdr lat))))
+    )
+  )
+)
+
+(multiinsertR 'topping 'fudge '(ice fudge cream with fudge for fudge dessert))
+; }}}
+
+; {{{ MULTIINSERTL
+(define multiinsertL
+  (lambda (n o lat) ; new seems to be a reserved word in racket
+    (cond
+      ((null? lat) (quote ()))
+      ; If we have found old, insert `new` to the left of `old`
+      ((eq? o (car lat)) (cons n (cons o (multiinsertL n o (cdr lat)))))
+
+      ; Keep the current item; Search for 'old' in the remainder of the list.
+      (else (cons (car lat) (multiinsertL n o (cdr lat))))
+    )
+  )
+)
+(multiinsertL 'topping 'fudge '(ice fudge cream with fudge for fudge dessert))
 
 ; }}}
 
-; }}}
+; In the book, the initial implementation of multiinsertL was implemented using
+; lat, instead of (car lat). Because the argument never changed when we
+; recurred, the function never passed the first item.
 
+; THE FOURTH COMMANDMENT
+; Always change one argument when recurring. It must be changed to be closer to
+; the termination case.
+
+; {{{ MULTISUBST
+(define multisubst
+  (lambda (n o lat) ; new seems to be a reserved word in racket
+    (cond
+      ((null? lat) (quote ()))
+      ; If we have found old, cons `new` to the tail of the list; this effectively
+      ; replaces the head of the list, `old`.
+      ((eq? o (car lat)) (cons n (multisubst n o (cdr lat))))
+
+
+      ; Keep the current item; Search for 'old' in the remainder of the list.
+      (else (cons (car lat) (multisubst n o (cdr lat))))
+    )
+  )
+)
+
+(multisubst 'topping 'fudge '(ice cream fudge with fudge for fudge dessert))
+; }}}}
